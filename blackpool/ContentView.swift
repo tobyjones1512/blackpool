@@ -9,49 +9,47 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
+    
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [Item]
+    
+    let categories = [
+        "🏠 Home", "☕️ Cafés", "🍽️ Restaurants", "💼 Business", "🎫 Events", "🎤 Musicians"
+    ]
+    
+    @State private var selectedCategory = "🏠 Home"
 
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
+        ScrollView (.horizontal, showsIndicators: false) {
+            HStack {
+                ForEach (categories, id: \.hashValue) { category in
+                    Button(category, action: {
+                        selectedCategory = category
+                    })
+                    .padding()
+                    .padding(.horizontal)
+                    .background(.regularMaterial)
+                    .opacity(selectedCategory == category ? 0.5 : 1)
+                    .clipShape(RoundedRectangle(cornerRadius: 30))
+                    .padding(.horizontal)
                 }
             }
-        } detail: {
-            Text("Select an item")
         }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
+        .padding(.vertical)
+        
+        switch (selectedCategory) {
+            case "💼 Business":
+                BusinessView()
+                    .modelContext(modelContext)
+            case "☕️ Cafés":
+                HomeView()
+                    .modelContext(modelContext)
+            default:
+                HomeView()
+                    .modelContext(modelContext)
         }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
-        }
+        
+        Spacer()
     }
 }
 

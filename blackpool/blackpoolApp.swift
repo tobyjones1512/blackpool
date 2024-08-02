@@ -26,6 +26,7 @@ struct blackpoolApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .fontDesign(.rounded)
         }
         .modelContainer(sharedModelContainer)
     }
